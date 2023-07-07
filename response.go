@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type response struct {
 	Errors  []any   `json:"errors"`
@@ -46,3 +49,15 @@ type habit struct {
 	} `json:"progress"`
 	HabitType int `json:"habit_type"`
 }
+
+func (i habit) Title() string { return i.Name }
+func (i habit) Description() string {
+	s := fmt.Sprintf("%s (%d/%d)", i.Status, i.Progress.CurrentValue, i.Progress.TargetValue)
+
+	if i.Area.Name != "" {
+		s += " • " + i.Area.Name
+	}
+
+	return s
+}
+func (i habit) FilterValue() string { return i.Name }

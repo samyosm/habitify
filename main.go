@@ -4,19 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
+var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type model struct {
 	spinner spinner.Model
-	table   table.Model
+	list    list.Model
 	cursor  int // which to-do list item our cursor is pointing at
 }
 
@@ -25,31 +23,10 @@ func initialModel() model {
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
-	columns := []table.Column{
-		{Title: "Status", Width: 12},
-		{Title: "Name", Width: 50},
-	}
+	l := list.New(nil, list.NewDefaultDelegate(), 0, 0)
+	l.Title = "Habits"
 
-	t := table.New(
-		table.WithColumns(columns),
-		table.WithRows([]table.Row{}),
-		table.WithFocused(true),
-		table.WithHeight(10),
-	)
-
-	st := table.DefaultStyles()
-	st.Header = st.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(false)
-	st.Selected = st.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-	t.SetStyles(st)
-
-	return model{spinner: s, table: t}
+	return model{spinner: s, list: l}
 }
 
 func (m model) Init() tea.Cmd {
@@ -58,12 +35,17 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
+
 	case habitsMsg:
-		var rows []table.Row
+		var items []list.Item
 		for _, habit := range msg {
-			rows = append(rows, table.Row{habit.Status, habit.Name})
+			items = append(items, habit)
 		}
-		m.table.SetRows(rows)
+		m.list.SetItems(items)
+
 	case tea.KeyMsg:
 
 		// Cool, what was the actual key pressed?
@@ -78,22 +60,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.table, cmd = m.table.Update(msg)
+	m.list, cmd = m.list.Update(msg)
 
 	return m, cmd
 }
 
 func (m model) View() string {
-	if len(m.table.Rows()) == 0 {
+	if len(m.list.Items()) == 0 {
 		s := fmt.Sprintf("\n\n   %s Loading habits...press q to quit\n\n", m.spinner.View())
 		return s
 	}
 
-	return baseStyle.Render(m.table.View()) + "\n"
+	return m.list.View()
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
