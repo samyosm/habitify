@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/arkan/dotconfig"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -75,6 +77,22 @@ func (m model) View() string {
 }
 
 func main() {
+	args := os.Args[1:]
+	// TODO: A proper CLI with a help menu
+	if len(args) == 2 && args[0] == "init" {
+		ss := settings{
+			ApiKey: args[1],
+		}
+		if err := dotconfig.Save("habitify", ss); err != nil {
+			log.Fatal("An error occured while trying to set api key")
+		} else {
+			fmt.Println("Successfully set api key")
+			return
+		}
+	} else if args != nil {
+		log.Fatal("Unexpected arguments")
+	}
+
 	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
