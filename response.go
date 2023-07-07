@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 type response struct {
@@ -50,9 +52,27 @@ type habit struct {
 	HabitType int `json:"habit_type"`
 }
 
+var (
+	// https://atlassian.design/foundations/color
+	red    = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5630"))
+	green  = lipgloss.NewStyle().Foreground(lipgloss.Color("#36B37E"))
+	yellow = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFC400"))
+	gray   = lipgloss.NewStyle().Foreground(lipgloss.Color("#5E6C84"))
+)
+
 func (i habit) Title() string { return i.Name }
 func (i habit) Description() string {
-	s := fmt.Sprintf("%s (%d/%d)", i.Status, i.Progress.CurrentValue, i.Progress.TargetValue)
+	s := ""
+	switch i.Status {
+	case "completed":
+		s += green.Render("Completed")
+	case "in_progress":
+		s += yellow.Render("In progress")
+	case "failed":
+		s += red.Render("Failed")
+	}
+
+	s += gray.Render(fmt.Sprintf(" (%d/%d)", i.Progress.CurrentValue, i.Progress.TargetValue))
 
 	if i.Area.Name != "" {
 		s += " • " + i.Area.Name
