@@ -1,4 +1,4 @@
-module github.com/samyosm/habitify-cli
+module github.com/samyosm/habitify
 
 go 1.20
 

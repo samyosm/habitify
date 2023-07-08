@@ -89,7 +89,7 @@ func main() {
 			fmt.Println("Successfully set api key")
 			return
 		}
-	} else if args != nil {
+	} else if len(args) != 0 {
 		log.Fatal("Unexpected arguments")
 	}
 
