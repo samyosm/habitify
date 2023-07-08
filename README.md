@@ -10,13 +10,13 @@ Use it to see the progress of your habits, change their status, and much more.
 
 ### Go
 ```bash
-go install github.com/samyosm/habitify-cli@latest
+go install github.com/samyosm/habitify@latest
 ```
 
 ### Manual Build
 ```bash
-git clone https://github.com/samyosm/habitify-cli.git
-cd habitify-cli
+git clone https://github.com/samyosm/habitify.git
+cd habitify
 go build
 ```
 
