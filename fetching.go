@@ -41,7 +41,7 @@ func fetchHabits() tea.Msg {
 	req, _ := http.NewRequest(http.MethodGet, "https://api.habitify.me/journal", nil)
 
 	q := req.URL.Query()
-	q.Add("target_date", "2023-07-05T00:00:00+00:00")
+	q.Add("target_date", time.Now().Format(time.RFC3339))
 
 	req.URL.RawQuery = q.Encode()
 
