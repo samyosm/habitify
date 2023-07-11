@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -63,4 +65,60 @@ func fetchHabits() tea.Msg {
 	json.Unmarshal(responseData, &responseObject)
 
 	return habitsMsg(responseObject.Habits)
+}
+
+func addHabitLog(habitId, unit_type string, value int) int {
+	data := []byte(fmt.Sprintf(`{
+		"unit_type": "%s",
+		"value": %d,
+		"target_date": "%s"
+	}`, unit_type, value, time.Now().Format(time.RFC3339)))
+
+	req, _ := http.NewRequest(http.MethodPost, "https://api.habitify.me/logs/"+habitId, bytes.NewBuffer(data))
+
+	req.Header.Set("Authorization", getApiKey())
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Failed to add log...")
+	}
+
+	if resp.StatusCode != 200 {
+		log.Print(habitId)
+		log.Print(unit_type)
+		log.Print(time.Now().Format(time.RFC3339))
+
+		responseData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		log.Fatal(string(responseData))
+	}
+
+	return resp.StatusCode
+}
+
+func putHabitStatus(habitId, status string) int {
+	data := []byte(fmt.Sprintf(`{
+		"status": "%s",
+		"target_date": "%s"
+	}`, status, time.Now().Format(time.RFC3339)))
+
+	req, _ := http.NewRequest(http.MethodPut, "https://api.habitify.me/status/"+habitId, bytes.NewBuffer(data))
+
+	req.Header.Set("Authorization", getApiKey())
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Failed to fetch data...")
+	}
+
+	return resp.StatusCode
 }

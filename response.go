@@ -68,6 +68,8 @@ func (i habit) Description() string {
 		s += green.Render("Completed")
 	case "in_progress":
 		s += yellow.Render("In progress")
+	case "skipped":
+		s += gray.Render("Skipped")
 	case "failed":
 		s += red.Render("Failed")
 	}
