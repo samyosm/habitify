@@ -6,6 +6,8 @@
 Habitify CLI is a text user interface that allows you to access and manage your habits in the [Habitify](https://www.habitify.me/) habit tracker.
 Use it to see the progress of your habits, change their status, and much more.
 
+![video](assets/demo.mkv)
+
 ## Installation
 
 ### Go
